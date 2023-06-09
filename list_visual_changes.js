@@ -5,6 +5,50 @@
 */
 'use strict';
 
+const running = {
+    lastLocation: window.location.pathname,
+
+    running: false,
+
+    currentData: null,
+
+    stopRunning() {
+        this.running = false;
+    },
+
+    async init() {
+        if (this.running) return;
+
+        this.running = true;
+
+        if (this.lastLocation !== window.location.pathname) {
+            this.lastLocation = location.pathname;
+            this.cleanUp();
+        }
+
+        const isAnime = /^\/anime/.test(location.pathname);
+
+        if (!this.currentData) {
+            const malID = (await fetchMALId(getMediaId(), isAnime)).data.Media.idMal;
+
+            if (!malID) {
+                return this.stopRunning();
+            }
+            this.currentData = malID;
+        }
+
+        addLinks(this.currentData, isAnime);
+
+        return this.stopRunning();
+    },
+
+    cleanUp() {
+        const elements = $('.MyAnimeList, .Shikimori');
+        for (const el of elements) el.remove();
+        this.currentData = null;
+    },
+};
+
 function getMediaType() {
     let url = window.location.href;
     return url.split('/')[3].toUpperCase();
@@ -61,7 +105,8 @@ function getMALId() {
     `;
 }
 
-function fetchMALId(a, b) {
+function fetchMALId(a, isAnime = true) {
+    let b = isAnime ? 'ANIME' : 'MANGA'
     const variables = {
         id: a,
         type: b
@@ -71,105 +116,65 @@ function fetchMALId(a, b) {
 
     return fetchQuery(studioQuery, url, variables);
 }
+function addLinks(malID, isAnime) {
+    let MyAnimeList = $('.MyAnimeList');
+    let Shikimori = $('.Shikimori');
+    if (MyAnimeList.length || Shikimori.length) return;
+    let EnglishTitle = document.querySelector('h1[data-v-5776f768]');
+    if (!EnglishTitle) return;
 
-function GetLinks(idMalValue) {
-    let Links = new Array();
+    let DivLinks = document.createElement('div');
+    DivLinks.classList.add('Links');
+    DivLinks.style.float = "right";
 
-    if (getMediaType() === 'ANIME') {
-        console.log('https://shikimori.me/animes/' + idMalValue);
-        Links['Shiki'] = 'https://shikimori.me/animes/' + idMalValue;
+    EnglishTitle.appendChild(DivLinks);
 
-        console.log('https://myanimelist.net/anime/' + idMalValue);
-        Links['MAL'] = 'https://myanimelist.net/anime/' + idMalValue;
-    } else {
-        console.log('https://shikimori.me/mangas/' + idMalValue);
-        Links['Shiki'] = 'https://shikimori.me/mangas/' + idMalValue;
+    let malLink = document.createElement('a');
+    malLink.classList.add('MyAnimeList');
+    malLink.setAttribute('target', '_blank');
+    malLink.href = `https://myanimelist.net/${isAnime ? 'anime' : 'manga'}/${malID}/`;
 
-        console.log('https://myanimelist.net/manga/' + idMalValue);
-        Links['MAL'] = 'https://myanimelist.net/manga/' + idMalValue;
-    }
-    return Links;
+    let malLinkImgContainer = document.createElement('div');
+    malLinkImgContainer.classList.add('icon-wrap');
+    malLinkImgContainer.style.padding = "0";
+
+    let malLinkImg = document.createElement('img');
+    malLinkImg.classList.add('icon');
+    malLinkImg.src = 'https://cdn.myanimelist.net/images/favicon.ico';
+    malLinkImg.width = '16';
+
+    malLinkImgContainer.append(malLinkImg);
+    malLink.append(malLinkImgContainer);
+
+    let shikiLink = document.createElement('a');
+    shikiLink.classList.add('Shikimori');
+    shikiLink.setAttribute('target', '_blank');
+    shikiLink.href = `https://shikimori.me/${isAnime ? 'animes' : 'mangas'}/${malID}/`;
+
+    let shikiLinkImgContainer = document.createElement('div');
+    shikiLinkImgContainer.classList.add('icon-wrap');
+    shikiLinkImgContainer.style.padding = "0";
+
+    let shikiLinkImg = document.createElement('img');
+    shikiLinkImg.classList.add('icon');
+    shikiLinkImg.src = 'https://shikimori.me/favicons/favicon-16x16.png';
+    shikiLinkImg.width = '16';
+
+    shikiLinkImgContainer.append(shikiLinkImg);
+    shikiLink.append(shikiLinkImgContainer);
+
+    DivLinks.append(shikiLink);
+    DivLinks.append(malLink);
 }
 
-function addLinks() {
-    let LinksToOtherSites = document.querySelector('.Links');
-
-    fetchMALId(getMediaId(), getMediaType())
-    .then((res) => {
-        let idMalValue = res.data.Media.idMal;
-
-        let data = GetLinks(idMalValue)
-
-        alert('test2');
-        let EnglishTitle = document.querySelector('h1[data-v-5776f768]');
-
-        if (LinksToOtherSites && LinksToOtherSites.textContent.split("/")[1] === rusTitle) {
-            console.log('проверка на совпадение');
-            return;
-        }
-
-        console.log('создание элемента');
-
-        let DivLinks = document.createElement('div');
-        DivLinks.classList.add('.Links');
-        DivLinks.style = "float: right";
-
-        let MALlink = document.createElement('a');
-
-        MALlink.classList.add('.link');
-        MALlink.href = data['MAL'];
-
-        let Shikilink = document.createElement('a');
-        Shikilink.classList.add('.link');
-        Shikilink.href = data['Shiki'];
-
-        let Shikiimg = document.createElement('img');
-        Shikiimg.src = "https://shikimori.me/favicons/favicon-16x16.png";
-        Shikiimg.width = "16";
-        Shikiimg.style = "margin-left: 5px;";
-
-        let MALimg = document.createElement('img');
-        MALimg.src = "https://cdn.myanimelist.net/images/favicon.ico";
-        MALimg.width = "16";
-
-
-        alert('test1');
-
-        EnglishTitle.appendChild(DivLinks);
-
-        DivLinks.appendChild(MALlink);
-        DivLinks.appendChild(Shikilink);
-
-        MALlink.appendChild(MALimg);
-        Shikilink.appendChild(Shikiimg);
-
-        LinksToOtherSites = DivLinks;
-    })
+function page(regex, href = false) {
+    return regex.test(href ? window.location.href : window.location.pathname);
 }
-
 
 const observersLink = new MutationObserver(() => {
-    let urlNext2 = window.location.href;
-
-    // запуск функции при обновлении страницы, так как видимо anilist не обновляет страницу при переходе по ссылкам
-    window.onload = function() { 
-        if (urlNext2.includes('/anime/') || urlNext2.includes('/manga/')) {
-            addLinks();
-
-            urlPrev2 = urlNext2;
-        }
-    };
-    // проверка, что ссылка не совпадает с предыдущей. Нужно для того, чтобы observe не запускал функцию несколько раз на одной странице
-    if (urlPrev2 === urlNext2) return;
-
-    // проверка, что ссылка ведет на страницу аниме или манги. Если не одна проверка не прошла
-    if (urlNext2.includes('/anime/') || urlNext2.includes('/manga/')) {
-        addLinks();
-
-        urlPrev2 = urlNext2;
+    if (page(/^\/(anime|manga)\/\d+\/[\w\d-_]+(\/)?$/)) {
+        running.init();
     }
 });
-
-let urlPrev2 = window.location.href;
 
 observersLink.observe(document, { childList: true, subtree: true });

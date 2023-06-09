@@ -19,8 +19,8 @@
     {
       "matches": ["*://anilist.co/*"],
       "js": [
-        "list_visual_changes.js", 
-        "content-script.js"
+        "jquery-3.7.0.min.js",
+        "list_visual_changes.js"
       ],
       "run_at": "document_end",
       "all_frames": true
