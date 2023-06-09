@@ -133,10 +133,12 @@ function addLinks(malID, isAnime) {
     malLink.classList.add('MyAnimeList');
     malLink.setAttribute('target', '_blank');
     malLink.href = `https://myanimelist.net/${isAnime ? 'anime' : 'manga'}/${malID}/`;
+    malLink.style.float = "right";
 
     let malLinkImgContainer = document.createElement('div');
     malLinkImgContainer.classList.add('icon-wrap');
     malLinkImgContainer.style.padding = "0";
+    malLinkImgContainer.style.margin = "0 5px";
 
     let malLinkImg = document.createElement('img');
     malLinkImg.classList.add('icon');
@@ -150,10 +152,12 @@ function addLinks(malID, isAnime) {
     shikiLink.classList.add('Shikimori');
     shikiLink.setAttribute('target', '_blank');
     shikiLink.href = `https://shikimori.me/${isAnime ? 'animes' : 'mangas'}/${malID}/`;
+    shikiLink.style.float = "right";
 
     let shikiLinkImgContainer = document.createElement('div');
     shikiLinkImgContainer.classList.add('icon-wrap');
     shikiLinkImgContainer.style.padding = "0";
+    shikiLinkImgContainer.style.margin = "0 5px";
 
     let shikiLinkImg = document.createElement('img');
     shikiLinkImg.classList.add('icon');
