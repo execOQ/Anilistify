@@ -14,6 +14,8 @@ const running = {
 
     currentDataShiki: null,
 
+    currentScore: null,
+
     stopRunning() {
         this.running = false;
     },
@@ -30,27 +32,39 @@ const running = {
 
         const isAnime = /^\/anime/.test(location.pathname);
 
-        if (!this.currentData || !this.currentDataShiki) {
-            const malID = (await fetchMALId(getMediaId(), isAnime)).data.Media.idMal;
-            const ShikiID = (await getShikiId(malID, isAnime)).russian;
+        if (!this.currentData || !this.currentDataShiki || !this.currentScore) {
+            const AnilistData = await fetchMALId(getMediaId(), isAnime);
+            const malID = AnilistData.data.Media.idMal;
+            const AnilistScore = AnilistData.data.Media.averageScore;
 
-            if (!malID || !ShikiID) {
+            const ShikiData = await getShikiId(malID, isAnime);
+            const ShikiID = ShikiData.russian;
+            const ShikiScore = ShikiData.score;
+
+            const MALData = await getMalData(malID, isAnime);
+            const MALScore = MALData.data.score;
+
+
+
+            if (!AnilistData || !ShikiData || !MALData) {
                 return this.stopRunning();
             }
 
             this.currentData = malID;
             this.currentDataShiki = ShikiID;
+            this.currentScore = [AnilistScore, MALScore, ShikiScore];
         }
 
 
         getRusTitle(this.currentDataShiki);
         addLinks(this.currentData, isAnime);
+        getScore(this.currentScore);
 
         return this.stopRunning();
     },
 
     cleanUp() {
-        const elements = $('.MyAnimeList, .Shikimori, .Span-Rus-Title');
+        const elements = $('.MyAnimeList, .Shikimori, .Span-Rus-Title, .scores-container');
         for (const el of elements) el.remove();
         this.currentData = null;
     },
@@ -58,6 +72,15 @@ const running = {
 
 function getShikiId(malID, isAnime) {
     let url = `https://shikimori.me/api/${isAnime ? 'animes' : 'mangas'}/${malID}/`;
+    return fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      return data;
+    });
+}
+
+function getMalData(malID, isAnime = true) {
+    let url = `https://api.jikan.moe/v4/${isAnime ? 'anime' : 'manga'}/${malID}`;
     return fetch(url)
     .then(response => response.json())
     .then(data => {
@@ -74,6 +97,14 @@ function getMediaType() {
 function getMediaId() {
     let url = window.location.href;
     return url.split('/')[4];
+}
+
+function request(options) {
+    return new Promise((resolve, reject) => {
+        options.onload = res => resolve(res);
+        options.onerror = err => reject(err);
+        options.ontimeout = err => reject(err);
+    });
 }
 
 function fetchQuery(query, url, variables) {
@@ -116,6 +147,7 @@ function getMALId() {
     query ($id: Int, $type: MediaType) { 
         Media(id: $id, type: $type) {
           idMal
+          averageScore
         }
       }
     `;
@@ -142,23 +174,63 @@ function getRusTitle(rusTitle) {
 
     if (spanRusElement) { // Проверка, существует ли элемент
         console.log('проверка на существование элемента');
-        if (spanRusElement.textContent.split("/")[1] === rusTitle) {
+        if (spanRusElement.textContent === rusTitle) {
             console.log('проверка на совпадение');
             return;
         }
         console.log('проверка на совпадение не прошла');
-        let parts = spanRusElement.textContent.split("/");
-        parts[1] = rusTitle;
-        spanRusElement.textContent = parts.join("/");
+        let parts = spanRusElement.textContent;
+        parts = rusTitle;
     } else {
         console.log('создание элемента');
+        let SeparateTexts = document.createElement('span');
+        SeparateTexts.classList.add('Separate-Texts');
+        SeparateTexts.textContent = ' / ';
+
         let SpanRus = document.createElement('span');
         SpanRus.classList.add('Span-Rus-Title');
-        SpanRus.textContent = '/' + rusTitle;
+        SpanRus.textContent = rusTitle;
+
+        EnglishTitle.appendChild(SeparateTexts);
         EnglishTitle.appendChild(SpanRus);
         spanRusElement = SpanRus; // Присваиваем переменной ссылку на созданный элемент
     }
 }
+
+function getScore(scores) {
+    let Anilist = $('.AnilistScore');
+    let MyAnimeList = $('.MALScore');
+    let Shikimori = $('.ShikiScore'); 
+    
+    if (MyAnimeList.length || Shikimori.length || Anilist.length) return;
+    let EnglishTitle = document.querySelector('p[data-v-5776f768]');
+    if (!EnglishTitle) return;
+
+    let newNode = document.createElement('div');
+    newNode.classList.add('scores-container');
+    newNode.style.marginTop = "10px";
+  
+    let AnilistScore = document.createElement('span');
+    AnilistScore.classList.add('AnilistScore', 'span-score');
+    AnilistScore.textContent = 'Anilist: ' + scores[0];
+
+    let MALScore = document.createElement('span');
+    MALScore.classList.add('MALScore', 'span-score');
+    MALScore.style.marginLeft = "10px";
+    MALScore.textContent = scores[1] + ' ' + 'on MyAnimeList';
+  
+    let ShikiScore = document.createElement('span');
+    ShikiScore.classList.add('ShikiScore', 'span-score');
+    ShikiScore.style.marginLeft = "10px";
+    ShikiScore.textContent = scores[2] + ' ' + 'on Shikimori';
+  
+    newNode.appendChild(AnilistScore);
+    newNode.appendChild(MALScore);
+    newNode.appendChild(ShikiScore);
+  
+    EnglishTitle.parentNode.insertBefore(newNode, EnglishTitle);
+}
+  
 
 function addLinks(malID, isAnime) {
     let MyAnimeList = $('.MyAnimeList');

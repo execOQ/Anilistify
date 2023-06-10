@@ -1,12 +1,12 @@
 {
   "manifest_version": 2,
-  "name": "Anilist RUS translator",
+  "name": "Anilistify",
   "version": "0.1",
 
   "description": "Enhanced AniList experience",
 
   "page_action": {
-      "default_title": "AniList+ for Anilist",
+      "default_title": "Anilistify for Anilist",
       "default_icon": {
         "16": "images/icon.png",
         "32": "images/icon.png",
@@ -28,7 +28,7 @@
   ],
   "minimum_chrome_version": "50",
   "permissions": ["*://anilist.co/*"],
-  "short_name": "AniList+",
+  "short_name": "Anilistify",
   "icons": {
     "16": "images/icon.png",
     "32": "images/icon.png",
