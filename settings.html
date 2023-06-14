@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <link rel="stylesheet" href="style.css">
+
+    </head>
+    <body>
+        <div class="container-div">
+            <div> 
+                <div class="backhome" style="float:left">
+                    <a href="index.html" class="svg-sidebar">
+                        <img src="images/left-arrow.svg" alt="home" class="home">
+                    </a>
+                </div>
+                <div class="backhome-text">
+                    <p>Go home</p>
+                </div>
+            </div>
+
+            <hr class="hr.sidebar">
+
+            <div class="content">
+
+                <div class="Anime-Manga-Settings">
+                    <h1>Anime/Manga pages</h1>
+                    <div class="Links form-check form-switch">
+                        <label for="Links-CheckBox">Enable Links?</label>
+                        <input type="checkbox" class="form-check-input Links-CheckBox" role="switch" name="Links-CheckBox" checked>
+                        <div class="Links-Extra">
+                            <div class="Links-Extra-MAL form-check form-switch">
+                                <label for="MAL-link">Enable MAL link?</label>
+                                <input type="checkbox" class="form-check-input MAL-link" role="switch" name="MAL-link" checked>
+                            </div>
+                            <div class="Links-Extra-Shikimori form-check form-switch">
+                                <label for="Shikimori-link">Enable Shikimori link?</label>
+                                <input type="checkbox" class="form-check-input Shikimori-link" role="switch" name="Shikimori-link" checked>
+                            </div>
+                            <div class="Links-Extra-Kitsu form-check form-switch">
+                                <label for="Kitsu-link">Enable Kitsu link? (developing)</label>
+                                <input type="checkbox" class="form-check-input Kitsu-link" role="switch" name="Kitsu-link" checked>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="russianTitle form-check form-switch">
+                        <label for="russianTitle-CheckBox">Enable Russian Titles?</label>
+                        <input type="checkbox" class="form-check-input russianTitle-CheckBox" role="switch" name="russianTitle-CheckBox">
+                    </div>
+                    <div class="ScoreHeader">
+                        <label for="scoreHeaderCheckbox">Type of score</label>
+                        <select class="form-select-sm form-select-sm scoreHeaderCheckbox" aria-label=".form-select-sm example">
+                            <option value="Header" selected>In header</option>
+                            <option value="Sidebar">In sidebar</option>
+                        </select>
+                        <div class="ScoreHeader-Extra">
+                            <ul>
+                                <div class="ScoreHeader-Extra-Anilist form-check form-switch">
+                                    <label for="anilistCheckbox">Enable Anilist Score?</label>
+                                    <input type="checkbox" class="form-check-input anilistCheckbox" role="switch" name="ScoreHeader-Extra-Anilist" checked>
+                                    <ul>
+                                        <label for="anilistCheckbox-icon">Enable icon?</label>
+                                        <input type="checkbox" class="form-check-input anilistCheckbox-icon" role="switch" name="ScoreHeader-Extra-Anilist-icon" checked>
+                                    </ul>
+                                </div>
+                                <div class="ScoreHeader-Extra-MAL form-check form-switch">
+                                    <label for="malCheckbox">Enable MAL Score?</label>
+                                    <input type="checkbox" class="form-check-input malCheckbox" role="switch" name="ScoreHeader-Extra-MAL" checked>
+                                </div>
+                                <div class="ScoreHeader-Extra-Shikimori form-check form-switch">
+                                    <label for="shikimoriCheckbox">Enable Shikimori Score?</label>
+                                    <input type="checkbox" class="form-check-input shikimoriCheckbox" role="switch" name="ScoreHeader-Extra-Shikimori" checked>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="Users-Settings">
+                    <h1>Users page</h1>
+                    <div class="Info form-check form-switch">
+                        <div class="Info-Extra-Created form-check form-switch">
+                            <label for="Info-created">Enable info when account was created?</label>
+                            <input type="checkbox" class="form-check-input Info-created" role="switch" name="Info-created" checked>
+                        </div>
+                        <div class="Info-Extra-Updated form-check form-switch">
+                            <label for="Info-updated">Enable info when was last update?</label>
+                            <input type="checkbox" class="form-check-input Info-updated" role="switch" name="Info-updated" checked>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="save-button">
+                    <button type="button" class="btn btn-primary" id="btn">Save</button>
+                    <p class="status" style="opacity: 0;"></p>
+                </div>
+            </div>
+        </div>
+        <script src="script.js"></script>
+    </body>
+</html>

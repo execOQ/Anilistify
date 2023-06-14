@@ -2,18 +2,17 @@
   "manifest_version": 2,
   "name": "Anilistify",
   "version": "0.1",
-
   "description": "Enhanced AniList experience",
-
-  "page_action": {
-      "default_title": "Anilistify for Anilist",
-      "default_icon": {
-        "16": "images/icon.png",
-        "32": "images/icon.png",
-        "64": "images/icon.png",
-        "128": "images/icon-128.png"
-      }
-    },
+  "browser_action": {
+    "default_title": "Anilistify for Anilist",
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "images/icon.png",
+      "32": "images/icon.png",
+      "64": "images/icon.png",
+      "128": "images/icon-128.png"
+    }
+  },
   "author": "consequential",
   "content_scripts": [
     {
@@ -27,7 +26,7 @@
     }
   ],
   "minimum_chrome_version": "50",
-  "permissions": ["*://anilist.co/*"],
+  "permissions": ["*://anilist.co/*", "storage"],
   "short_name": "Anilistify",
   "icons": {
     "16": "images/icon.png",
@@ -35,4 +34,4 @@
     "64": "images/icon.png",
     "128": "images/icon-128.png"
   }
-  }
+}

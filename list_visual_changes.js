@@ -4,6 +4,8 @@
 *
 */
 'use strict';
+  
+
 
 const svg = {
     /** from AniList */
@@ -20,6 +22,49 @@ const svg = {
     loading:
       '<svg width="60" height="8" viewbox="0 0 130 32" style="fill: rgb(var(--color-text-light, 80%, 80%, 80%))" xmlns="http://www.w3.org/2000/svg" fill="#fff"><circle cx="15" cy="15" r="15"><animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"/><animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"/></circle><circle cx="60" cy="15" r="9" fill-opacity=".3"><animate attributeName="r" from="9" to="9" begin="0s" dur="0.8s" values="9;15;9" calcMode="linear" repeatCount="indefinite"/><animate attributeName="fill-opacity" from=".5" to=".5" begin="0s" dur="0.8s" values=".5;1;.5" calcMode="linear" repeatCount="indefinite"/></circle><circle cx="105" cy="15" r="15"><animate attributeName="r" from="15" to="15" begin="0s" dur="0.8s" values="15;9;15" calcMode="linear" repeatCount="indefinite"/><animate attributeName="fill-opacity" from="1" to="1" begin="0s" dur="0.8s" values="1;.5;1" calcMode="linear" repeatCount="indefinite"/></circle></svg>',
 };
+
+const getconfig = {
+    LinksCheckbox: null,
+    
+    MALlinkCheckbox: null,
+
+    ShikimoriLinkCheckbox: null,
+
+    KitsulinkCheckbox: null,
+
+    russianTitleCheckbox: null,
+
+    scoreHeaderCheckbox: null,
+
+    anilistCheckbox: null,
+
+    malCheckbox: null,
+
+    shikimoriCheckbox: null,
+
+
+    async init() {
+        const self = this; // Сохраняем ссылку на объект getconfig
+    
+        chrome.storage.sync.get(
+            ['Links', 'MALlink', 'ShikimoriLink', 'KitsuLink', 'russianTitle', 'scoreHeader', 'anilist', 'anilistIcon', 'mal', 'shikimori'],
+            function (result) {
+                self.LinksCheckbox = result.Links;
+                self.MALlinkCheckbox = result.MALlink;
+                self.ShikimoriLinkCheckbox = result.ShikimoriLink;
+                self.KitsulinkCheckbox = result.KitsuLink;
+
+                self.russianTitleCheckbox = result.russianTitle;
+
+                self.scoreHeaderCheckbox = result.scoreHeader;
+                self.anilistCheckbox = result.anilist;
+                self.anilistIcon = result.anilistIcon;
+                self.malCheckbox = result.mal;
+                self.shikimoriCheckbox = result.shikimori;
+            }
+        );
+    }
+}
 
 const running = {
     lastLocation: window.location.pathname,
@@ -71,10 +116,17 @@ const running = {
             this.currentScore = [AnilistScore, MALScore, ShikiScore];
         }
 
+        if (getconfig.russianTitleCheckbox) {
+            getRusTitle(this.currentDataShiki);
+        }
+        
+        if (getconfig.LinksCheckbox && (getconfig.MALlinkCheckbox || getconfig.ShikimoriLinkCheckbox || getconfig.KitsulinkCheckbox)) {
+            addLinks(this.currentData, isAnime);
+        }
 
-        getRusTitle(this.currentDataShiki);
-        addLinks(this.currentData, isAnime);
-        getScore(this.currentScore);
+        if (getconfig.anilistCheckbox || getconfig.malCheckbox || getconfig.shikimoriCheckbox) {
+            getScore(this.currentScore);
+        }
 
         return this.stopRunning();
     },
@@ -217,57 +269,124 @@ function getScore(scores) {
     let Anilist = $('.AnilistScore');
     let MyAnimeList = $('.MALScore');
     let Shikimori = $('.ShikiScore'); 
+
+    let EnglishTitle = document.querySelector('p[data-v-5776f768]');
+    let Sidebar = document.querySelector('.rankings');
     
     if (MyAnimeList.length || Shikimori.length || Anilist.length) return;
-    let EnglishTitle = document.querySelector('p[data-v-5776f768]');
-    if (!EnglishTitle) return;
+    if (!EnglishTitle || !Sidebar) return;
 
     let newNode = document.createElement('div');
     newNode.classList.add('scores-container');
-    newNode.style.marginTop = "10px";
-    
-    let iconMarkup;
-    //if (this.config.showIconWithAniListScore) {
-    if (scores[0] === null || scores[0] == undefined) {
-        iconMarkup = svg.straight;
-    } else if (scores[0] >= 75) {
-        iconMarkup = svg.smile;
-    } else if (scores[0] >= 60) {
-        iconMarkup = svg.straight;
-    } else {
-        iconMarkup = svg.frown;
+
+    if (getconfig.scoreHeaderCheckbox === 'Sidebar') {
+        let typeDiv = document.createElement('div');
+        typeDiv.textContent = 'Scores';
+        typeDiv.style.fontSize = '1.3rem';
+        typeDiv.style.fontWeight = '500';
+        typeDiv.style.paddingBottom = '5px';
+        newNode.appendChild(typeDiv);
     }
-    //}
 
     let AnilistDiv = document.createElement('div');
     AnilistDiv.classList.add('Anilist-Container');
-    AnilistDiv.style.display = "inline-block";
-    let iconSpan = document.createElement('span');
-    iconSpan.classList.add('icon-score');
-    iconSpan.innerHTML = iconMarkup + ' ';
 
     let AnilistScore = document.createElement('span');
     AnilistScore.classList.add('AnilistScore', 'span-score');
-    AnilistScore.textContent = scores[0] + '%';
+    if (scores[0] === null || scores[0] == undefined) {
+        AnilistScore.textContent = 'No score on AniList';
+    }
 
-    AnilistDiv.appendChild(iconSpan);
+    if (getconfig.anilistIcon) {
+        let iconMarkup;
+
+        if (scores[0] === null || scores[0] == undefined) {
+            iconMarkup = svg.straight;
+        } else if (scores[0] >= 75) {
+            iconMarkup = svg.smile;
+        } else if (scores[0] >= 60) {
+            iconMarkup = svg.straight;
+        } else {
+            iconMarkup = svg.frown;
+        }
+
+        let iconSpan = document.createElement('span');
+        iconSpan.classList.add('icon-score');
+        iconSpan.innerHTML = iconMarkup + ' ';
+
+        AnilistDiv.appendChild(iconSpan);
+
+        AnilistScore.textContent = scores[0] + '%';
+    } else {
+        AnilistScore.textContent = scores[0] + '% on AniList';
+    }
+
     AnilistDiv.appendChild(AnilistScore);
+
 
     let MALScore = document.createElement('span');
     MALScore.classList.add('MALScore', 'span-score');
-    MALScore.style.marginLeft = "10px";
+    if (scores[1] === null || scores[1] == undefined) {
+        MALScore.textContent = 'No score on MyAnimeList';
+    }
     MALScore.textContent = scores[1] + ' ' + 'on MyAnimeList';
+
   
     let ShikiScore = document.createElement('span');
     ShikiScore.classList.add('ShikiScore', 'span-score');
-    ShikiScore.style.marginLeft = "10px";
+    if (scores[2] === null || scores[2] == undefined || scores[2] === '0.0') {
+        ShikiScore.textContent = 'No score on Shikimori';
+    }
     ShikiScore.textContent = scores[2] + ' ' + 'on Shikimori';
-  
-    newNode.appendChild(AnilistDiv);
-    newNode.appendChild(MALScore);
-    newNode.appendChild(ShikiScore);
-  
-    EnglishTitle.parentNode.insertBefore(newNode, EnglishTitle);
+
+
+    if (getconfig.anilistCheckbox) {
+        newNode.appendChild(AnilistDiv);
+    }
+
+    if (getconfig.malCheckbox) {
+        newNode.appendChild(MALScore);
+    }
+
+    if (getconfig.shikimoriCheckbox) {
+        newNode.appendChild(ShikiScore);
+    }
+
+
+
+    if (getconfig.scoreHeaderCheckbox === 'Header') {  
+        newNode.style.marginTop = "10px";
+
+        AnilistDiv.style.display = "inline-block";
+
+        MALScore.style.marginLeft = "10px";
+        ShikiScore.style.marginLeft = "10px";
+
+        EnglishTitle.parentNode.insertBefore(newNode, EnglishTitle);
+    }
+    
+    if (getconfig.scoreHeaderCheckbox === 'Sidebar') {
+        newNode.style.marginBottom = "16px";
+        newNode.style.background = "rgb(var(--color-foreground))";
+        newNode.style.borderRadius = "3px";
+        newNode.style.display = "block";
+        newNode.style.padding = "18px";
+        newNode.style.width = "100%";
+        
+
+        AnilistDiv.style.display = "block";
+        AnilistDiv.style.marginBottom = "5px";
+        MALScore.style.display = "block";
+        MALScore.style.marginBottom = "5px";
+        ShikiScore.style.display = "block";
+
+        AnilistScore.style.fontSize = "1.2rem";
+        MALScore.style.fontSize = "1.2rem";
+        ShikiScore.style.fontSize = "1.2rem";
+        
+
+        Sidebar.parentNode.insertBefore(newNode, Sidebar);
+    }
 }
   
 
@@ -321,9 +440,18 @@ function addLinks(malID, isAnime) {
 
     shikiLinkImgContainer.append(shikiLinkImg);
     shikiLink.append(shikiLinkImgContainer);
+    
+    if (getconfig.ShikimoriLinkCheckbox) {
+        DivLinks.append(shikiLink);
+    }
 
-    DivLinks.append(shikiLink);
-    DivLinks.append(malLink);
+    if (getconfig.MALlinkCheckbox) {
+        DivLinks.append(malLink);
+    }
+
+    if (getconfig.KitsulinkCheckbox) {
+        console.log('Kitsu link is not implemented yet');
+    }
 }
 
 function page(regex, href = false) {
@@ -331,6 +459,7 @@ function page(regex, href = false) {
 }
 
 const observersLink = new MutationObserver(() => {
+    getconfig.init();
     if (page(/^\/(anime|manga)\/\d+\/[\w\d-_]+(\/)?$/)) {
         running.init();
     }
