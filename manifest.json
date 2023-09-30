@@ -1,22 +1,14 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Anilistify",
   "version": "0.1",
   "description": "Enhanced AniList experience",
-  "browser_action": {
-    "default_title": "Anilistify for Anilist",
-    "default_popup": "index.html",
-    "default_icon": {
-      "16": "images/icon.png",
-      "32": "images/icon.png",
-      "64": "images/icon.png",
-      "128": "images/icon-128.png"
-    }
-  },
   "author": "consequential",
   "content_scripts": [
     {
-      "matches": ["*://anilist.co/*"],
+      "matches": [
+        "*://anilist.co/*"
+      ],
       "js": [
         "jquery-3.7.0.min.js",
         "list_visual_changes.js"
@@ -26,12 +18,28 @@
     }
   ],
   "minimum_chrome_version": "50",
-  "permissions": ["*://anilist.co/*", "storage"],
+  "permissions": [
+    "storage"
+  ],
   "short_name": "Anilistify",
   "icons": {
     "16": "images/icon.png",
     "32": "images/icon.png",
     "64": "images/icon.png",
     "128": "images/icon-128.png"
-  }
+  },
+  "action": {
+    "default_title": "Anilistify for Anilist",
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "images/icon.png",
+      "32": "images/icon.png",
+      "64": "images/icon.png",
+      "128": "images/icon-128.png"
+    }
+  },
+  "content_security_policy": {},
+  "host_permissions": [
+    "*://anilist.co/*"
+  ]
 }

@@ -1,13 +1,12 @@
-# AniList+ for Anilist
+# Anilistify 
+<img src="images/icon.png" width="200">
+
+Anilistity is extension for my own purposes, i just needed for more comfortable use an [Anilist](Anilist.co).
+
 ## Current features:
-- Improved readability of the progress for users with grey theme when using grid lists
-- Scores in Anime and Manga lists are highlighted from red to green
-- Proper 'Studio' tab on anime pages
-- You no longer need to scroll to the top of the page yourself after clicking a link.
+- Translate in Russian an anime title
+- Quick links to MAL and Shikimori sites
+- Scores from MAL, Anilist and Shikimori under a title or sidebar
 
-## Upcoming features:
-- Pipeline representation of Relations
+Currently its all, and I don't think that I'll bring something new, but maybe I will invent something :)
 
-## [Get it now on the Chrome Webstore!](https://chrome.google.com/webstore/detail/anilist%20-for-anilist/elpfbellmnhbenkcdofdbdkneppoekhl)
-
-### [Visit AniList.co](https://anilist.co/home)

@@ -24,8 +24,8 @@ const svg = {
 };
 
 const getconfig = {
-    LinksCheckbox: null,
-    
+    HoverEffectCheckbox: null,
+
     MALlinkCheckbox: null,
 
     ShikimoriLinkCheckbox: null,
@@ -47,9 +47,10 @@ const getconfig = {
         const self = this; // Сохраняем ссылку на объект getconfig
     
         chrome.storage.sync.get(
-            ['Links', 'MALlink', 'ShikimoriLink', 'KitsuLink', 'russianTitle', 'scoreHeader', 'anilist', 'anilistIcon', 'mal', 'shikimori'],
+            ['HoverEffect', 'MALlink', 'ShikimoriLink', 'KitsuLink', 'russianTitle', 'scoreHeader', 'anilist', 'anilistIcon', 'mal', 'shikimori'],
             function (result) {
-                self.LinksCheckbox = result.Links;
+                self.HoverEffectCheckbox = result.HoverEffect;
+
                 self.MALlinkCheckbox = result.MALlink;
                 self.ShikimoriLinkCheckbox = result.ShikimoriLink;
                 self.KitsulinkCheckbox = result.KitsuLink;
@@ -120,7 +121,7 @@ const running = {
             getRusTitle(this.currentDataShiki);
         }
         
-        if (getconfig.LinksCheckbox && (getconfig.MALlinkCheckbox || getconfig.ShikimoriLinkCheckbox || getconfig.KitsulinkCheckbox)) {
+        if (getconfig.MALlinkCheckbox || getconfig.ShikimoriLinkCheckbox || getconfig.KitsulinkCheckbox) {
             addLinks(this.currentData, isAnime);
         }
 
@@ -458,10 +459,91 @@ function page(regex, href = false) {
     return regex.test(href ? window.location.href : window.location.pathname);
 }
 
+function hoverIMG() {
+    var images = document.getElementsByClassName("cover");
+
+    for (var i = 0; i < images.length; i++) {
+        (function() {
+            var originalHeight = images[i].offsetHeight;
+            var originalWidth = images[i].offsetWidth;
+            var parentDivClass;
+            var parentDivClassMainPage;
+
+            images[i].addEventListener("mouseover", function() {
+                parentDivClassMainPage = this.parentNode.parentNode.parentNode.className;
+                parentDivClass = this.parentNode.className;
+
+                if (page(/^\/search\/(anime|manga)$/) &&
+                    (!parentDivClassMainPage.includes("top"))) {
+                    this.style.zIndex = "9";
+                    this.style.transform = "scale(1.3)";
+
+                    // Получаем текстовый элемент
+                    var titleElement = this.nextElementSibling;
+                    // Изменяем позиционирование и размеры текстового элемента
+                    titleElement.style.position = "absolute";
+                    titleElement.style.bottom = "0";
+                    titleElement.style.left = "0";
+                    titleElement.style.transition = "all 0.3s ease";
+                    titleElement.style.transform = "translateY(100%)";
+
+                }
+
+                if (page(/^\/(anime|manga)\/\d+\/[\w\d-_]+(\/)?$/) &&
+                    (parentDivClass.includes("media-preview-card") ||
+                    parentDivClass.includes("character") ||
+                    parentDivClass.includes("staff"))
+                ) {
+                    this.style.zIndex = "99";
+                    this.style.position = "absolute";
+                    this.style.width = originalWidth * 2 + "px";
+                    this.style.height = originalHeight * 2 + "px";
+                } 
+            });
+
+            images[i].addEventListener("mouseout", function() {
+                if (page(/^\/search\/(anime|manga)$/)) {
+                    this.style.zIndex = "";
+                    this.style.transform = "scale(1)";
+
+                    var titleElement = this.nextElementSibling;
+                    titleElement.style.position = "relative";
+                    titleElement.style.bottom = "";
+                    titleElement.style.left = "";
+                    titleElement.style.transform = "";
+
+                    titleElement.style.background = "";
+                    titleElement.style.borderRadius = "";
+                    titleElement.style.padding = "";
+                } else {
+                    this.style.transform = "scale(1)";
+                }
+
+                if (page(/^\/(anime|manga)\/\d+\/[\w\d-_]+(\/)?$/) &&
+                    (parentDivClass.includes("media-preview-card") ||
+                    parentDivClass.includes("character") ||
+                    parentDivClass.includes("staff"))
+                ) {
+                    this.style.zIndex = "auto";
+                    this.style.position = "relative";
+                    this.style.width = originalWidth + "px";
+                    this.style.height = originalHeight + "px";
+                }
+            });
+        })(i);
+    }
+}
+  
+  
+
 const observersLink = new MutationObserver(() => {
     getconfig.init();
     if (page(/^\/(anime|manga)\/\d+\/[\w\d-_]+(\/)?$/)) {
         running.init();
+    }
+
+    if (getconfig.HoverEffectCheckbox) {
+        hoverIMG();
     }
 });
 

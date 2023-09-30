@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    var LinksCheckbox = document.querySelector('.Links-CheckBox');
+    var HoverEffectCheckbox = document.querySelector('.Hover-Effect');
+
     var MALlinkCheckbox = document.querySelector('.MAL-link');
     var ShikimoriLinkCheckbox = document.querySelector('.Shikimori-link');
     var KitsulinkCheckbox = document.querySelector('.Kitsu-link');
@@ -17,9 +18,10 @@ document.addEventListener('DOMContentLoaded', function () {
   
     // Загрузка сохраненных значений из хранилища при открытии всплывающего окна
     chrome.storage.sync.get(
-      ['Links', 'MALlink', 'ShikimoriLink', 'KitsuLink', 'russianTitle', 'scoreHeader', 'anilist', 'anilistIcon', 'mal', 'shikimori', 'Infocreated', 'Infoupdated'],
+      ['HoverEffect', 'MALlink', 'ShikimoriLink', 'KitsuLink', 'russianTitle', 'scoreHeader', 'anilist', 'anilistIcon', 'mal', 'shikimori', 'Infocreated', 'Infoupdated'],
       function (result) {
-        LinksCheckbox.checked = result.Links || false;
+        HoverEffectCheckbox.checked = result.HoverEffect || false;
+
         MALlinkCheckbox.checked = result.MALlink || false;
         ShikimoriLinkCheckbox.checked = result.ShikimoriLink || false;
         KitsulinkCheckbox.checked = result.KitsuLink || false;
@@ -41,7 +43,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Сохранение значений в хранилище при нажатии на кнопку "Save"
     var saveButton = document.getElementById('btn');
     saveButton.addEventListener('click', function () {
-        var LinksChecked = LinksCheckbox.checked;
+        var HoverEffectChecked = HoverEffectCheckbox.checked;
+
         var MALlinkChecked = MALlinkCheckbox.checked;
         var ShikimoriLinkChecked = ShikimoriLinkCheckbox.checked;
         var KitsulinkChecked = KitsulinkCheckbox.checked;
@@ -60,7 +63,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Сохранение значений в хранилище
         chrome.storage.sync.set(
             {
-            Links: LinksChecked,
+            HoverEffect: HoverEffectChecked,
+            
             MALlink: MALlinkChecked,
             ShikimoriLink: ShikimoriLinkChecked,
             KitsuLink: KitsulinkChecked,
