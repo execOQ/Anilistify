@@ -4,8 +4,6 @@
 *
 */
 'use strict';
-  
-
 
 const svg = {
     /** from AniList */
@@ -235,11 +233,19 @@ function fetchMALId(a, isAnime = true) {
 }
 
 function getRusTitle(rusTitle) {
+    let EnglishTitle = document.querySelector('h1[data-v-5776f768]');
     let spanRusElement = document.querySelector('.Span-Rus-Title');
+    let textSeparator = document.querySelector('.Separate-Texts');
 
     console.log('данные получены');
 
-    let EnglishTitle = document.querySelector('h1[data-v-5776f768]');
+    if (!textSeparator) {
+        let SeparateTexts = document.createElement('span');
+        SeparateTexts.classList.add('Separate-Texts');
+        SeparateTexts.textContent = ' / ';
+
+        EnglishTitle.appendChild(SeparateTexts);
+    }
 
     if (spanRusElement) { // Проверка, существует ли элемент
         console.log('проверка на существование элемента');
@@ -248,20 +254,15 @@ function getRusTitle(rusTitle) {
             return;
         }
         console.log('проверка на совпадение не прошла');
-        let parts = spanRusElement.textContent;
-        parts = rusTitle;
+        spanRusElement.textContent = rusTitle;
     } else {
         console.log('создание элемента');
-        let SeparateTexts = document.createElement('span');
-        SeparateTexts.classList.add('Separate-Texts');
-        SeparateTexts.textContent = ' / ';
 
         let SpanRus = document.createElement('span');
         SpanRus.classList.add('Span-Rus-Title');
         SpanRus.textContent = rusTitle;
 
-        EnglishTitle.appendChild(SeparateTexts);
-        EnglishTitle.appendChild(SpanRus);
+        document.querySelector('.Separate-Texts').after(SpanRus);
         spanRusElement = SpanRus; // Присваиваем переменной ссылку на созданный элемент
     }
 }
@@ -332,7 +333,7 @@ function getScore(scores) {
     }
     MALScore.textContent = scores[1] + ' ' + 'on MyAnimeList';
 
-  
+
     let ShikiScore = document.createElement('span');
     ShikiScore.classList.add('ShikiScore', 'span-score');
     if (scores[2] === null || scores[2] == undefined || scores[2] === '0.0') {
