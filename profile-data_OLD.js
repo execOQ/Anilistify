@@ -147,15 +147,15 @@ function AddProfileDetails(userID) {
     if (getconfig.InfocreatedCheckbox) {
         if (typeof(CreatedAtExists) == 'undefined' && CreatedAtExists == null) {
             if (CreatedAtExists === createdAt) {
-                console.log('created at same');
+                console.log('"Created at" is the same');
                 return;
             } 
             if (CreatedAtExists !== createdAt) {
-                console.log('created at not same');
+                console.log('"Created at" is not the same');
                 CreatedAtExists = 'Created at: ' + createdAt;
             }
         } else {
-            console.log('created at not exists');
+            console.log('"Created at" does not exist');
             let CreatedAt = document.createElement('span');
 
             CreatedAt.classList.add('CreatedAt');
@@ -216,7 +216,9 @@ function timeConverter(UNIX_timestamp) {
     return time;
 }
 
-const observersLink = new MutationObserver(() => {
+const observersLink = new MutationObserver(async () => {
+    const page = (await import("./extras/page.js")).default;
+    
     getconfig.init();
     if (page(/\/user\/\w+\/?$/i)) {
         running.profile();

@@ -11,10 +11,16 @@
       ],
       "js": [
         "jquery-3.7.0.min.js",
-        "list_visual_changes.js"
+        "titles_changes_init.js"
       ],
       "run_at": "document_end",
       "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": ["<all_urls>"],
+      "resources": ["extras/*", "common/*"]
     }
   ],
   "minimum_chrome_version": "50",
