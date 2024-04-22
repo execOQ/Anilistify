@@ -16,8 +16,7 @@ async function fetchQuery(query, url, variables) {
         const data = await handleResponse(response);
         return data;
     } catch (error) {
-        alert('Anilistify could not fetch the API, check the console for more info.');
-        console.error(error);
+        console.error(error); 
     }
 }
 
@@ -48,7 +47,7 @@ async function fetchAnilistData(a, isAnime = true) {
     return await fetchQuery(query, url, variables);
 }
 
-async function fetchShikiData_V2(id, isAnime = true) {
+async function fetchShikiData(id, isAnime = true) {
     console.log(id);
     
     const url = 'https://shikimori.one/api/graphql';
@@ -89,14 +88,6 @@ async function fetchShikiData_V2(id, isAnime = true) {
     return await fetchQuery(query, url, variables);
 }
 
-async function fetchShikiData(malID, isAnime) {
-    let url = `https://shikimori.me/api/${isAnime ? 'animes' : 'mangas'}/${malID}/`;
-    const response = await fetch(url);
-    const data = await response.json();
-
-    return data;
-}
-
 async function fetchMALData(malID, isAnime = true) {
     let url = `https://api.jikan.moe/v4/${isAnime ? 'anime' : 'manga'}/${malID}`;
     const response = await fetch(url);
@@ -105,4 +96,4 @@ async function fetchMALData(malID, isAnime = true) {
     return data;
 }
 
-export default { fetchAnilistData, fetchShikiData_V2, fetchMALData };
+export default { fetchAnilistData, fetchShikiData, fetchMALData };

@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var malCheckbox = document.querySelector('.malCheckbox');
     var shikimoriCheckbox = document.querySelector('.shikimoriCheckbox');
 
-    var Infocreated = document.querySelector('.Info-created');
-    var Infoupdated = document.querySelector('.Info-updated');
-  
+    //var Infocreated = document.querySelector('.Info-created');
+    //var Infoupdated = document.querySelector('.Info-updated');
+
     // Загрузка сохраненных значений из хранилища при открытии всплывающего окна
     chrome.storage.sync.get(
-      ['HoverEffect', 'MALlink', 'ShikimoriLink', 'KitsuLink', 'russianTitle', 'scoreHeader', 'anilist', 'anilistIcon', 'mal', 'shikimori', 'Infocreated', 'Infoupdated'],
-      function (result) {
+        ['HoverEffect', 'MALlink', 'ShikimoriLink', 'KitsuLink', 'russianTitle', 'scoreHeader', 'anilist', 'anilistIcon', 'mal', 'shikimori', 'Infocreated', 'Infoupdated'],
+        function (result) {
         HoverEffectCheckbox.checked = result.HoverEffect || false;
 
         MALlinkCheckbox.checked = result.MALlink || false;
@@ -34,12 +34,11 @@ document.addEventListener('DOMContentLoaded', function () {
         malCheckbox.checked = result.mal || false;
         shikimoriCheckbox.checked = result.shikimori || false;
 
-        Infocreated.checked = result.Infocreated || false;
-        Infoupdated.checked = result.Infoupdated || false;
+        //Infocreated.checked = result.Infocreated || false;
+        //Infoupdated.checked = result.Infoupdated || false;
 
-      }
-    );
-  
+    });
+
     // Сохранение значений в хранилище при нажатии на кнопку "Save"
     var saveButton = document.getElementById('btn');
     saveButton.addEventListener('click', function () {
@@ -57,8 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var malChecked = malCheckbox.checked;
         var shikimoriChecked = shikimoriCheckbox.checked;
 
-        var InfocreatedChecked = Infocreated.checked;
-        var InfoupdatedChecked = Infoupdated.checked;
+        //var InfocreatedChecked = Infocreated.checked;
+        //var InfoupdatedChecked = Infoupdated.checked;
   
         // Сохранение значений в хранилище
         chrome.storage.sync.set(
@@ -77,8 +76,8 @@ document.addEventListener('DOMContentLoaded', function () {
             mal: malChecked,
             shikimori: shikimoriChecked,
 
-            Infocreated: InfocreatedChecked,
-            Infoupdated: InfoupdatedChecked,
+            //Infocreated: InfocreatedChecked,
+            //Infoupdated: InfoupdatedChecked,
 
             },
             function () {
@@ -95,4 +94,4 @@ document.addEventListener('DOMContentLoaded', function () {
         );
     });
 });
-  
+

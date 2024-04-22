@@ -52,97 +52,129 @@ const getconfig = {
 const running = {
     lastLocation: window.location.pathname,
 
-    running: false,
+    first: true,
 
     currentData: null,
 
-    currentDataShiki: null,
+    russianTitle: null,
 
     currentScore: null,
 
-    stopRunning() {
-        this.running = false;
-    },
-
     async init() {
-        if (this.running) return;
-
-        this.running = true;
-
+        console.log(this.first, this.lastLocation, location.pathname)
         if (this.lastLocation !== window.location.pathname) {
-            this.lastLocation = location.pathname;
+            this.first = true;
+            this.lastLocation = window.location.pathname;
             this.cleanUp();
         }
 
+        if (this.first == false) return;
+
+        this.first = false;
+
         const isAnime = /^\/anime/.test(location.pathname);
 
-        if (!this.currentData || !this.currentDataShiki || !this.currentScore) {
-            const { fetchAnilistData, fetchShikiData_V2, fetchMALData } = (await import("./extras/fetchQuery.js")).default;
-            const getMediaId = (await import("./extras/getMediaId.js")).default;
-            const calculateAverageScore = (await import("./extras/calculateShikiScore.js")).default;
+        const { fetchAnilistData, fetchShikiData, fetchMALData } = (await import("./extras/fetchQuery.js")).default;
+        const getMediaId = (await import("./extras/getMediaId.js")).default;
+        const calculateAverageScore = (await import("./extras/calculateShikiScore.js")).default;
+        const {fetchDataForRelationsAnime} = (await import("./common/rusTitle.js")).default;
 
-            const AnilistData = (await fetchAnilistData(getMediaId(), isAnime)).data.Media;
-            console.log("Anilist data:");
-            console.log(AnilistData);
+        let AnilistScore = null;
+        let MALScore = null;
+        let ShikiScore = null;
 
-            const malID = AnilistData.idMal;
-            const AnilistScore = AnilistData.averageScore;
+        const AnilistFetch = (await fetchAnilistData(getMediaId(), isAnime));
+        if (!AnilistFetch) {
+            return this.stopRunning();
+        }
 
-            const ShikiData = (await fetchShikiData_V2(malID, isAnime)).data[isAnime ? "animes" : "mangas"][0];
-            console.log("Shikimori data:");
-            console.log(ShikiData);
+        const AnilistData = AnilistFetch.data.Media;
+        console.log("Anilist data:", AnilistData);
 
-            const rusName = ShikiData.russian;
-            const ShikiScore = calculateAverageScore(ShikiData.scoresStats).toFixed(2);
+        AnilistScore = AnilistData.averageScore;
+        const malID = AnilistData.idMal;
+
+        if (getconfig.MALlinkCheckbox || getconfig.ShikimoriLinkCheckbox || getconfig.KitsulinkCheckbox) {
+            const {addLinks} = (await import("./common/addLinks.js")).default;
+            
+            addLinks(malID, isAnime, getconfig);
+        }
+
+        const ShikiFetch = fetchShikiData(malID, isAnime);
+        const MALFetch = fetchMALData(malID, isAnime);
+        const [ ShikiResponse, MALResponse ] = await Promise.allSettled([ShikiFetch, MALFetch]);
+
+        if (ShikiResponse.status === "fulfilled") {
+            const ShikiData = ShikiResponse.value.data[isAnime ? "animes" : "mangas"][0];
+            console.log("Shikimori data:", ShikiData);
+
+            ShikiScore = calculateAverageScore(ShikiData.scoresStats).toFixed(2);
             console.log("Calculated Shikimori score: " + ShikiScore);
 
-            const MALData = (await fetchMALData(malID, isAnime)).data;
-            const MALScore = MALData.score;
-
-
-
-            if (!AnilistData || !ShikiData || !MALData) {
-                return this.stopRunning();
-            }
-
-            this.currentData = malID;
-            this.currentDataShiki = rusName;
-            this.currentScore = [AnilistScore, MALScore, ShikiScore];
+            this.russianTitle = ShikiData.russian;
+        } else {
+            console.log("Fetching data from Shikimori is failed!");
         }
 
-        if (getconfig.russianTitleCheckbox) {
-            const getRusTitle = (await import("./common/rusTitle.js")).default;
+        if (MALResponse.status === "fulfilled") {
+            const MALData = MALResponse.value.data;
+            console.log("MAL data:", MALData);
 
-            getRusTitle(this.currentDataShiki);
+            MALScore = MALData.score;
+        } else {
+            console.log("Fetching data from MAL is failed!");
         }
+
+        fetchDataForRelationsAnime(getconfig);
+
+        this.currentData = malID;
+        this.currentScore = [AnilistScore, MALScore, ShikiScore];
         
-        if (getconfig.MALlinkCheckbox || getconfig.ShikimoriLinkCheckbox || getconfig.KitsulinkCheckbox) {
-            const addLinks = (await import("./common/addLinks.js")).default;
 
-            addLinks(this.currentData, isAnime, getconfig);
+        // TODO: сделать проверки, что есть данные и в случае чего выдавать ошибку, но не прерывать другие фишки
+        if (getconfig.russianTitleCheckbox && this.russianTitle != null) {
+            const { getRusTitle } = (await import("./common/rusTitle.js")).default;
+
+            getRusTitle(this.russianTitle);
         }
 
         if (getconfig.anilistCheckbox || getconfig.malCheckbox || getconfig.shikimoriCheckbox) {
-            const getScore = (await import("./common/getScore.js")).default;
+            const createScoreContainer = (await import("./common/getScore.js")).default;
 
-            await getScore(this.currentScore, getconfig);
+            let isInHeader = getconfig.scoreHeaderCheckbox === 'Header' ? true : false;
+            let place = document.querySelector(getconfig.scoreHeaderCheckbox === 'Header' ? 'h1[data-v-5776f768]' : '.rankings');
+            if (!place) return;
+            if (place.parentNode.querySelector(`.scores-container`)) {
+                console.log("Score header already exists!");
+                return;
+            }
+
+            let scoreContainer = await createScoreContainer(this.currentScore, false, isInHeader, getconfig);
+            place.after(scoreContainer, place.nextSibling);
         }
-
-        return this.stopRunning();
     },
 
     cleanUp() {
-        const elements = $('.MyAnimeList, .Shikimori, .Span-Rus-Title, .scores-container');
+        let actions = document.querySelector('.actions');
+        actions.style.display = 'grid';
+
+        let favoriteButton = document.querySelector('.favourite');
+        actions.appendChild(favoriteButton.parentNode.removeChild(favoriteButton));
+
+        const elements = $('.Span-Rus-Title, .scores-container, .Links, .Separate-Texts');
         for (const el of elements) el.remove();
         this.currentData = null;
     },
 };
 
 const observersLink = new MutationObserver(async () => {
-    const page = (await import("./extras/page.js")).default;
+    const { page } = (await import("./extras/general.js"));
 
     getconfig.init();
     if (page(/^\/(anime|manga)\/\d+\/[\w\d-_]+(\/)?$/)) {
+        const { waitForPageToBeVisible } = (await import("./extras/general.js"));
+        await waitForPageToBeVisible();
+
         running.init();
     }
 
